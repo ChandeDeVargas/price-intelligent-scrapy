@@ -1,7 +1,7 @@
 """
-Tests — Día 1: base spider y limpieza de precios.
+Tests — Day 1: base spider and price cleaning.
 
-Ejecutar:
+Run:
     pytest tests/test_day1.py -v
 """
 

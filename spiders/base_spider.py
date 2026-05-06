@@ -96,9 +96,9 @@ class BaseProductSpider(scrapy.Spider):
             return None
 
     def make_item(self, **kwargs) -> ProductItem:
-        """Crea un ProductItem con defaults para todos los campos (Día 1 + Día 2)."""
+        """Creates a ProductItem with defaults for all fields (Day 1 + Day 2)."""
         item = ProductItem()
-        # Día 1
+        # Day 1
         item["store"] = self.store_name
         item["currency"] = self.currency
         item["scraped_at"] = datetime.now(timezone.utc).isoformat()
@@ -108,7 +108,7 @@ class BaseProductSpider(scrapy.Spider):
         item["brand"] = None
         item["category"] = None
         item["original_price"] = None
-        # Día 2
+        # Day 2
         item["name_normalized"] = None
         item["description"] = None
         item["image_url"] = None

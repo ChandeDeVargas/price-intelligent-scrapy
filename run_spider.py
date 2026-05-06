@@ -1,13 +1,13 @@
 #!/usr/bin/env python3
 """
-CLI para ejecutar spiders manualmente.
+CLI for running spiders manually.
 
-Uso:
+Usage:
     python run_spider.py mercadolibre --category computacion --max-pages 2
     python run_spider.py mercadolibre --category celulares
     python run_spider.py generic --url https://example.com --store MyStore
 
-El output se guarda en output/<spider_name>.jsonl
+Output is saved to output/<spider_name>.jsonl
 """
 import argparse
 import logging
@@ -58,36 +58,36 @@ def main():
         description="Price Intelligence — Spider Runner",
         formatter_class=argparse.RawDescriptionHelpFormatter,
         epilog="""
-Ejemplos:
+Examples:
   python run_spider.py mercadolibre --category computacion --max-pages 2
   python run_spider.py mercadolibre --category celulares
-  python run_spider.py generic --url https://example.com --store MiTienda
+  python run_spider.py generic --url https://example.com --store MyStore
         """,
     )
 
-    parser.add_argument("spider", choices=SPIDERS, help="Spider a ejecutar")
-    parser.add_argument("--url", help="URL de inicio (requerida para generic)")
-    parser.add_argument("--category", default="computacion", help="Categoría (mercadolibre)")
-    parser.add_argument("--store", help="Nombre de la tienda (generic)")
+    parser.add_argument("spider", choices=SPIDERS, help="Spider to execute")
+    parser.add_argument("--url", help="Start URL (required for generic)")
+    parser.add_argument("--category", default="computacion", help="Category (mercadolibre)")
+    parser.add_argument("--store", help="Store name (generic)")
     parser.add_argument("--max-pages", dest="max_pages", type=int, default=2)
-    parser.add_argument("--sel-name", dest="sel_name", help="CSS selector para nombre")
-    parser.add_argument("--sel-price", dest="sel_price", help="CSS selector para precio")
-    parser.add_argument("--sel-links", dest="sel_links", help="CSS selector para links de productos")
+    parser.add_argument("--sel-name", dest="sel_name", help="CSS selector for name")
+    parser.add_argument("--sel-price", dest="sel_price", help="CSS selector for price")
+    parser.add_argument("--sel-links", dest="sel_links", help="CSS selector for product links")
 
     args = parser.parse_args()
 
     cmd = build_scrapy_command(args.spider, args)
 
-    logger.info(f"Ejecutando: {' '.join(cmd)}")
+    logger.info(f"Running: {' '.join(cmd)}")
     logger.info(f"Output → output/{args.spider}.jsonl\n")
 
     result = subprocess.run(cmd, cwd=".")
 
     if result.returncode == 0:
-        logger.info("✓ Spider terminó exitosamente")
-        logger.info(f"Revisa el output en: output/{args.spider}.jsonl")
+        logger.info("✓ Spider finished successfully")
+        logger.info(f"Check the output at: output/{args.spider}.jsonl")
     else:
-        logger.error(f"✗ Spider falló con código {result.returncode}")
+        logger.error(f"✗ Spider failed with code {result.returncode}")
         sys.exit(result.returncode)
 
 
