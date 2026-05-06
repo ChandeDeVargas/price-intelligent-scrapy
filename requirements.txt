@@ -1,0 +1,34 @@
+# Scraping
+scrapy
+beautifulsoup4
+lxml
+requests
+fake-useragent
+scrapy-user-agents
+
+# API
+fastapi
+uvicorn[standard]
+pydantic
+pydantic-settings
+python-dotenv
+
+# Database
+sqlalchemy
+alembic
+psycopg2-binary
+
+# Scheduling
+apscheduler
+
+# Notifications
+httpx
+
+# Utils
+python-dateutil
+rich
+
+# Testing
+pytest
+pytest-asyncio
+httpx
