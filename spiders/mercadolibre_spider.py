@@ -7,11 +7,16 @@ Usage:
 """
 import logging
 import re
+import sys
+import os
 
 import scrapy
 
+sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+
 from .base_spider import BaseProductSpider
 from .items import ProductItem
+from parsers import ProductParser, DataCleaner, STORE_CONFIGS
 
 logger = logging.getLogger(__name__)
 
@@ -55,6 +60,8 @@ class MercadoLibreSpider(BaseProductSpider):
         self.max_pages = int(max_pages)
         self.pages_crawled = 0
         self.country = country
+        self.parser = ProductParser(STORE_CONFIGS["mercadolibre"])
+        self.cleaner = DataCleaner()
 
         if url:
             self.start_urls = [url]
@@ -111,77 +118,52 @@ class MercadoLibreSpider(BaseProductSpider):
     # ── Product detail page ───────────────────────────────────────────────────
 
     def parse_product(self, response) -> ProductItem:
-        """Parse a MercadoLibre product detail page."""
+        """Parse a MercadoLibre product detail page using ProductParser (Day 2)."""
         try:
-            soup = self.soup(response)
+            sku = self._extract_sku(response.url)
 
-            # Product name
-            name = (
-                response.css("h1.ui-pdp-title::text").get()
-                or response.css("h1.item-title__primary::text").get()
-                or ""
-            ).strip()
+            # Day 2: use ProductParser + DataCleaner instead of manual selectors
+            parsed = self.parser.parse(response.text, url=response.url, sku=sku)
+            report = self.cleaner.clean(parsed)
 
-            if not name:
-                logger.warning(f"[mercadolibre] No name found at {response.url}")
+            if not parsed.is_valid:
+                logger.warning(
+                    f"[mercadolibre] Invalid product at {response.url} | "
+                    f"errors: {parsed.parse_errors}"
+                )
                 self.items_failed += 1
                 return
 
-            # Price — MercadoLibre uses andes-money-amount structure
-            price_raw = (
-                response.css(
-                    "span.andes-money-amount__fraction::text"
-                ).getall()
-            )
-
-            # First price is usually the current price
-            price = self.clean_price(price_raw[0]) if price_raw else None
-
-            # Original price (before discount) — typically the second amount shown
-            original_price = self.clean_price(price_raw[1]) if len(price_raw) > 1 else None
-
-            # Currency
-            currency_symbol = response.css(
-                "span.andes-money-amount__currency-symbol::text"
-            ).get() or "RD$"
-            currency = self._resolve_currency(currency_symbol)
-
-            # Stock status
-            add_to_cart = response.css(
-                "button.ui-pdp-action--primary, "
-                "button#add-to-cart"
-            ).get()
-            in_stock = add_to_cart is not None
-
-            # SKU / Item ID — usually in the URL
-            sku = self._extract_sku(response.url)
-
-            # Brand
-            brand = response.css(
-                "span.ui-pdp-color--BLACK.ui-pdp-size--XSMALL::text, "
-                "span[class*='brand']::text"
-            ).get()
-
-            # Category (breadcrumb)
-            breadcrumb = response.css(
-                "ol.andes-breadcrumb li a::text"
-            ).getall()
-            category = " > ".join(breadcrumb[1:]) if len(breadcrumb) > 1 else None
+            if report.warnings:
+                for w in report.warnings:
+                    logger.warning(f"[mercadolibre] {w}")
 
             item = self.make_item(
-                url=response.url,
-                name=name,
-                sku=sku,
-                brand=brand,
-                category=category,
-                price=price,
-                original_price=original_price,
-                currency=currency,
-                in_stock=in_stock,
+                url=parsed.url,
+                name=parsed.name,
+                sku=parsed.sku,
+                brand=parsed.brand,
+                category=parsed.category,
+                price=parsed.price,
+                original_price=parsed.original_price,
+                currency=parsed.currency,
+                in_stock=parsed.in_stock,
+                # New fields from Day 2
+                discount_pct=parsed.discount_pct,
+                is_on_sale=parsed.is_on_sale,
+                description=parsed.description,
+                image_url=parsed.image_url,
+                specs=parsed.specs,
+                seller_name=parsed.seller_name,
+                stock_qty=parsed.stock_qty,
             )
 
             self.items_scraped += 1
-            logger.info(f"[mercadolibre] Scraped: {name[:60]} | Price: {currency} {price}")
+            sale_tag = f" 🔥 -{parsed.discount_pct}%" if parsed.is_on_sale else ""
+            logger.info(
+                f"[mercadolibre] ✓ {parsed.name[:55]} | "
+                f"{parsed.currency} {parsed.price}{sale_tag}"
+            )
             return item
 
         except Exception as exc:
@@ -208,4 +190,4 @@ class MercadoLibreSpider(BaseProductSpider):
 
     def handle_error(self, failure):
         self.items_failed += 1
-        logger.error(f"[mercadolibre] Request failed: {failure.request.url} — {failure.value}")
+        logger.error(f"[mercadolibre] Request failed: {failure.request.url} — {failure.value}") 
