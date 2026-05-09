@@ -1,8 +1,8 @@
 """
-Tests — Día 2: ProductParser, DataCleaner y funciones de normalización.
+Tests — Day 2: ProductParser, DataCleaner, and normalization functions.
 
-Ejecutar:
-    pytest tests/test_day2.py -v
+Run:
+    pytest tests/test_product_parse.py -v
 """
 import pytest
 import sys
@@ -38,7 +38,7 @@ def make_ml_html(
     stock_qty="5",
     image_url="https://img.ml.com/product.jpg",
 ):
-    """Genera HTML mínimo que imita la estructura de MercadoLibre."""
+    """Generates minimal HTML mimicking MercadoLibre's structure."""
 
     crumbs_html = "".join(
         f'<li class="andes-breadcrumb__item"><a href="#">{c}</a></li>'
