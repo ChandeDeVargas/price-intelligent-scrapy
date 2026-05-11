@@ -1,10 +1,10 @@
 """
-Tests — Día 3: modelos ORM, repositorios y PriceChangeDetector.
+Tests — Day 3: ORM models, repositories, and PriceChangeDetector.
 
-Ejecutar:
-    pytest tests/test_day3.py -v
+Run:
+    pytest tests/test_db.py -v
 
-Usa una DB SQLite en memoria para aislar cada test.
+Uses an in-memory SQLite DB to isolate each test.
 """
 
 import pytest
@@ -29,7 +29,7 @@ from db.price_detector import PriceChangeDetector, ChangeType
 
 @pytest.fixture(scope="function")
 def db():
-    """Sesión SQLite in-memory — se descarta tras cada test."""
+    """In-memory SQLite session — discarded after each test."""
     engine = create_engine(
         "sqlite:///:memory:",
         connect_args={"check_same_thread": False},
@@ -71,7 +71,7 @@ def detector():
 # ── ParsedProduct stub ────────────────────────────────────────────────────────
 
 class FakeParsed:
-    """Simula un ParsedProduct del Día 2 para tests de repo."""
+    """Simula un ParsedProduct del Day 2 para tests de repo."""
     def __init__(self, **kwargs):
         self.url = kwargs.get("url", "https://ml.com/product/1")
         self.store = kwargs.get("store", "TestStore")

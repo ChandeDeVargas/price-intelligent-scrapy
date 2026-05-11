@@ -4,7 +4,7 @@ Price Change Detector — detecta cambios entre el precio anterior y el nuevo.
 Esta es la lógica central del sistema: compara dos registros de PriceHistory
 y decide si el cambio es relevante para generar una alerta.
 
-Separado del engine (Día 5) para poder testearlo sin scheduler.
+Separado del engine (Day 5) para poder testearlo sin scheduler.
 
 Uso:
     from db.price_detector import PriceChangeDetector, ChangeResult

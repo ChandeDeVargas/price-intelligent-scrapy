@@ -37,14 +37,14 @@ class ProductRepository:
 
     def upsert_from_parsed(self, parsed) -> Product:
         """
-        Crea o actualiza un Product a partir de un ParsedProduct (Día 2).
+        Crea o actualiza un Product a partir de un ParsedProduct (Day 2).
 
         Si el producto ya existe (por URL), actualiza sus campos.
         Si es nuevo, lo crea.
         En ambos casos, inserta un registro en price_history.
 
         Args:
-            parsed: ParsedProduct del parser del Día 2
+            parsed: ParsedProduct del parser del Day 2
 
         Returns:
             Product (creado o actualizado)
@@ -374,7 +374,7 @@ class PriceAlertRepository:
         return alert
 
     def get_pending(self) -> list[PriceAlert]:
-        """Alertas que aún no han sido notificadas (para el Día 6)."""
+        """Alertas que aún no han sido notificadas (para el Day 6)."""
         return (
             self.db.query(PriceAlert)
             .filter(PriceAlert.is_notified == False)

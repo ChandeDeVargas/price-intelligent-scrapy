@@ -1,18 +1,18 @@
 """
-Gestión de la sesión y engine de SQLAlchemy.
+SQLAlchemy session and engine management.
 
-Uso en FastAPI (Día 4):
+FastAPI usage (Day 4):
     from db.session import get_db
 
     @app.get("/products")
     def list_products(db: Session = Depends(get_db)):
         ...
 
-Uso en scripts/tests:
+Usage in scripts/tests:
     from db.session import SessionLocal, engine
     from db.models import Base
 
-    Base.metadata.create_all(engine)   # crea tablas
+    Base.metadata.create_all(engine)   # creates tables
     with SessionLocal() as db:
         ...
 """
@@ -35,14 +35,14 @@ settings = get_settings()
 def _make_engine():
     db_url = settings.database_url
     kwargs = {
-        "echo": False,          # True para ver todas las queries en consola
-        "pool_pre_ping": True,  # Verifica conexión antes de usarla
+        "echo": False,          # True to see all queries in console
+        "pool_pre_ping": True,  # Verify connection before use
     }
 
     if db_url.startswith("sqlite"):
-        # SQLite necesita check_same_thread=False para FastAPI
+        # SQLite needs check_same_thread=False for FastAPI
         kwargs["connect_args"] = {"check_same_thread": False}
-        # Pool simple para SQLite
+        # Simple pool for SQLite
         kwargs["pool_size"] = 1 if "memory" in db_url else 5
     else:
         # PostgreSQL: connection pool
@@ -52,7 +52,7 @@ def _make_engine():
 
     engine = create_engine(db_url, **kwargs)
 
-    # SQLite: habilitar WAL mode y foreign keys
+    # SQLite: enable WAL mode and foreign keys
     if db_url.startswith("sqlite"):
         @event.listens_for(engine, "connect")
         def _set_sqlite_pragma(dbapi_conn, _):
@@ -73,7 +73,7 @@ SessionLocal = sessionmaker(
     bind=engine,
     autocommit=False,
     autoflush=False,
-    expire_on_commit=False,  # evita queries lazy post-commit
+    expire_on_commit=False,  # avoids lazy queries post-commit
 )
 
 
@@ -81,7 +81,7 @@ SessionLocal = sessionmaker(
 
 def get_db() -> Generator[Session, None, None]:
     """
-    FastAPI dependency — inyecta una sesión de DB por request.
+    FastAPI dependency — injects a DB session per request.
 
         @app.get("/products")
         def list(db: Session = Depends(get_db)):
@@ -103,7 +103,7 @@ def get_db() -> Generator[Session, None, None]:
 @contextmanager
 def db_session() -> Generator[Session, None, None]:
     """
-    Context manager para uso fuera de FastAPI (scripts, jobs, tests).
+    Context manager for use outside FastAPI (scripts, jobs, tests).
 
         with db_session() as db:
             products = db.query(Product).all()
@@ -122,7 +122,7 @@ def db_session() -> Generator[Session, None, None]:
 # ── Utilities ─────────────────────────────────────────────────────────────────
 
 def ping() -> bool:
-    """Verifica que la DB esté accesible."""
+    """Verifies that the DB is accessible."""
     try:
         with engine.connect() as conn:
             conn.execute(text("SELECT 1"))
